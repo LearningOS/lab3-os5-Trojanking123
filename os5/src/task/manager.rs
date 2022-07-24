@@ -7,6 +7,7 @@
 use super::TaskControlBlock;
 use crate::sync::UPSafeCell;
 use alloc::collections::VecDeque;
+use alloc::vec::Vec;
 use alloc::sync::Arc;
 use lazy_static::*;
 
@@ -25,10 +26,16 @@ impl TaskManager {
     /// Add process back to ready queue
     pub fn add(&mut self, task: Arc<TaskControlBlock>) {
         self.ready_queue.push_back(task);
+        // let a = self.ready_queue.clone().into_iter().map(|x| x.clone().pid.0);
+        // let b = a.collect::<Vec<usize>>();
+        // info!("after add: {:?}", b);
     }
     /// Take a process out of the ready queue
     pub fn fetch(&mut self) -> Option<Arc<TaskControlBlock>> {
-        self.ready_queue.pop_front()
+        let a = self.ready_queue.pop_front();
+        let pid = a.clone().unwrap().pid.0;
+        info!("fetch pid: {:?}", pid);
+        a
     }
 }
 

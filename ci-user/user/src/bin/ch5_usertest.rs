@@ -13,7 +13,7 @@ static TESTS: &[&str] = &[
     "ch3b_yield1\0",
     "ch3b_yield2\0",
     "ch3b_sleep\0",
-    "ch3b_sleep1\0",
+    "ch3b_sleep1\0",    
     "ch4_mmap0\0",
     "ch4_mmap1\0",
     "ch4_mmap2\0",
@@ -25,7 +25,7 @@ static TESTS: &[&str] = &[
     "ch5_setprio\0",
     // "ch5_stride\0",
 ];
-static STEST: &str = "ch5_stride\0";
+static STEST: &str = "ch5_stride0\0";
 
 use user_lib::{spawn, waitpid};
 

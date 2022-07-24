@@ -129,33 +129,33 @@ pub fn sys_get_time(_ts: *mut TimeVal, _tz: usize) -> isize {
     }else {
         error!("cross two page !!!!!");
     }
+    0
 
     
-    0
+    // -1
 }
 
 // YOUR JOB: 引入虚地址后重写 sys_task_info
 pub fn sys_task_info(ti: *mut TaskInfo) -> isize { 
      
-    let ll = core::mem::size_of::<TaskInfo>();
-    info!("ll: {:?}", ll);
-    let mut v = translated_byte_buffer( current_user_token(), ti as *const u8, ll);
-    if v.len() == 1 {
-        //info!("len of task vec is 1 !");
-        let a = v[0].as_mut_ptr();
-        info!("taskinfo a ptr {:?}", a);
-        let ti: *mut TaskInfo  = unsafe { core::mem::transmute(a) };
+    // let ll = core::mem::size_of::<TaskInfo>();
+    // info!("ll: {:?}", ll);
+    // let mut v = translated_byte_buffer( current_user_token(), ti as *const u8, ll);
+    // if v.len() == 1 {
+    //     //info!("len of task vec is 1 !");
+    //     let a = v[0].as_mut_ptr();
+    //     info!("taskinfo a ptr {:?}", a);
+    //     let ti: *mut TaskInfo  = unsafe { core::mem::transmute(a) };
 
-        get_task_info_inner(ti);
-    }else {
-        error!("cross two page !!!!!");
-        panic!("!!!!");
-    }
+    //     get_task_info_inner(ti);
+    // }else {
+    //     error!("cross two page !!!!!");
+    //     panic!("!!!!");
+    // }
     
     
-    //get_task_info_inner(ti) ;
-    
-    0
+    // 0
+    -1
 }
 
 // YOUR JOB: 实现sys_set_priority，为任务添加优先级
@@ -165,18 +165,33 @@ pub fn sys_set_priority(_prio: isize) -> isize {
 
 // YOUR JOB: 扩展内核以实现 sys_mmap 和 sys_munmap
 pub fn sys_mmap(_start: usize, _len: usize, _port: usize) -> isize {
-    sys_mmap_inner(_start, _len, _port)
+    //sys_mmap_inner(_start, _len, _port)
+    -1
     
 }   
 
 pub fn sys_munmap(_start: usize, _len: usize) -> isize {
-    sys_munmap_inner(_start, _len)
+    //sys_munmap_inner(_start, _len)
+    -1
 }
-
+    
 
 //
 // YOUR JOB: 实现 sys_spawn 系统调用
 // ALERT: 注意在实现 SPAWN 时不需要复制父进程地址空间，SPAWN != FORK + EXEC 
 pub fn sys_spawn(_path: *const u8) -> isize {
-    -1
+    let token = current_user_token();
+    let path = translated_str(token, _path);
+    if let Some(data) = get_app_data_by_name(path.as_str()) {
+        let task = current_task().unwrap();
+        let new_task =  task.spawn(data);
+        let new_pid = new_task.pid.0;
+        add_task(new_task);
+        
+        let a = new_pid as isize;
+        info!("spawn task: {:?} as pid: {:?}",path, a);
+        a
+    } else {
+        -1
+    }
 }
