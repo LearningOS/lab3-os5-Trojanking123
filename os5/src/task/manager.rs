@@ -8,11 +8,14 @@ use super::TaskControlBlock;
 use crate::sync::UPSafeCell;
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
+use alloc::collections::BinaryHeap;
 use alloc::sync::Arc;
 use lazy_static::*;
 
+use crate::config::BigStride;
+
 pub struct TaskManager {
-    ready_queue: VecDeque<Arc<TaskControlBlock>>,
+    ready_queue: BinaryHeap<Arc<TaskControlBlock>>,
 }
 
 // YOUR JOB: FIFO->Stride
@@ -20,21 +23,24 @@ pub struct TaskManager {
 impl TaskManager {
     pub fn new() -> Self {
         Self {
-            ready_queue: VecDeque::new(),
+            ready_queue: BinaryHeap::new(),
         }
     }
     /// Add process back to ready queue
     pub fn add(&mut self, task: Arc<TaskControlBlock>) {
-        self.ready_queue.push_back(task);
+        self.ready_queue.push(task);
         // let a = self.ready_queue.clone().into_iter().map(|x| x.clone().pid.0);
         // let b = a.collect::<Vec<usize>>();
         // info!("after add: {:?}", b);
     }
     /// Take a process out of the ready queue
     pub fn fetch(&mut self) -> Option<Arc<TaskControlBlock>> {
-        let a = self.ready_queue.pop_front();
-        let pid = a.clone().unwrap().pid.0;
-        info!("fetch pid: {:?}", pid);
+        let a = self.ready_queue.pop();
+        let tcb = a.clone().unwrap();
+        let pid = tcb.pid.0;
+        let mut inner = tcb.inner_exclusive_access();
+        info!("fetch pid: {:?} and pass is {:?}", pid, inner.pass);
+        inner.pass += BigStride / inner.prio;
         a
     }
 }

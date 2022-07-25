@@ -10,6 +10,7 @@ use alloc::sync::{Arc, Weak};
 use alloc::vec::Vec;
 use core::{cell::RefMut, char::MAX};
 pub use crate::config::MAX_SYSCALL_NUM;
+use core::cmp::Ordering;
 
 /// Task control block structure
 ///
@@ -24,6 +25,29 @@ pub struct TaskControlBlock {
     inner: UPSafeCell<TaskControlBlockInner>,
 }
 
+impl PartialEq for TaskControlBlock {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner_exclusive_access().pass == other.inner_exclusive_access().pass 
+    }
+}
+
+impl Eq for TaskControlBlock {
+    
+}
+
+
+
+impl Ord for TaskControlBlock {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.inner_exclusive_access().pass.cmp(&self.inner_exclusive_access().pass)
+    }
+}
+
+impl PartialOrd for TaskControlBlock {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
 /// Structure containing more process content
 ///
 /// Store the contents that will change during operation
@@ -50,6 +74,8 @@ pub struct TaskControlBlockInner {
     pub first_time: usize,
     pub dispatched: bool, 
     pub syscall_times: [u32; MAX_SYSCALL_NUM],
+    pub pass: isize,
+    pub prio: isize,
 }
 
 /// Simple access to its internal fields
@@ -110,6 +136,8 @@ impl TaskControlBlock {
                     first_time: 0,
                     dispatched: false,
                     syscall_times: [0; MAX_SYSCALL_NUM],
+                    pass: 0,
+                    prio: 16,
                 })
             },
         };
@@ -180,6 +208,8 @@ impl TaskControlBlock {
                     first_time: 0, 
                     dispatched: false,
                     syscall_times: [0; MAX_SYSCALL_NUM],
+                    pass: 0,
+                    prio: 16,
                 })
             },
         });
@@ -230,6 +260,8 @@ impl TaskControlBlock {
                     first_time: 0, 
                     dispatched: false,
                     syscall_times: [0; MAX_SYSCALL_NUM],
+                    pass: 0,
+                    prio: 16
                 })
             },
         });

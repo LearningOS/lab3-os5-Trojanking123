@@ -1,6 +1,6 @@
 //! Implementation of process management mechanism
 //!
-//! Here& is the entry for process scheduling required by other modules
+//! Here&& is the entry for process scheduling required by other modules
 //! (such as syscall or clock interrupt).
 //! By suspending or exiting the current process, you can
 //! modify the process state, manage the process queue through TASK_MANAGER,
@@ -149,4 +149,13 @@ pub fn sys_munmap_inner(start: usize, len: usize ) -> isize {
         return -1;
     }
     munmap(start, len)
+}
+
+pub fn set_priority_inner(prio: isize) -> isize {
+    let task = current_task().unwrap();
+    let mut inner = task.inner_exclusive_access();
+    info!("set task: {:?} prio from {:?} to {:?}", task.pid.0, inner.prio, prio);
+    inner.prio = prio;
+
+    0
 }
