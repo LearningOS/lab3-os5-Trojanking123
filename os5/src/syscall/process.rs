@@ -11,8 +11,6 @@ use crate::timer::get_time_us;
 use alloc::sync::Arc;
 use crate::config::MAX_SYSCALL_NUM;
 
-use crate::mm::translated_byte_buffer;
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct TimeVal {
@@ -65,6 +63,7 @@ pub fn sys_exec(path: *const u8) -> isize {
     if let Some(data) = get_app_data_by_name(path.as_str()) {
         let task = current_task().unwrap();
         task.exec(data);
+        info!("exec path {:?} as pid: {:?}", path, task.pid.0);
         0
     } else {
         -1
@@ -167,6 +166,9 @@ pub fn sys_spawn(_path: *const u8) -> isize {
         let task = current_task().unwrap();
         let new_task =  task.spawn(data);
         let new_pid = new_task.pid.0;
+        let trap_cx = new_task.inner_exclusive_access().get_trap_cx();
+
+        trap_cx.x[10] = 0;
         add_task(new_task);
         
         let a = new_pid as isize;

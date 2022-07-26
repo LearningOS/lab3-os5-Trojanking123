@@ -12,7 +12,7 @@ use alloc::collections::BinaryHeap;
 use alloc::sync::Arc;
 use lazy_static::*;
 
-use crate::config::BigStride;
+use crate::config::BIG_STRIDE;
 
 pub struct TaskManager {
     ready_queue: BinaryHeap<Arc<TaskControlBlock>>,
@@ -29,9 +29,9 @@ impl TaskManager {
     /// Add process back to ready queue
     pub fn add(&mut self, task: Arc<TaskControlBlock>) {
         self.ready_queue.push(task);
-        // let a = self.ready_queue.clone().into_iter().map(|x| x.clone().pid.0);
-        // let b = a.collect::<Vec<usize>>();
-        // info!("after add: {:?}", b);
+        let a = self.ready_queue.clone().into_iter().map(|x| x.clone().pid.0);
+        let b = a.collect::<Vec<usize>>();
+        //info!("after add: {:?}", b);
     }
     /// Take a process out of the ready queue
     pub fn fetch(&mut self) -> Option<Arc<TaskControlBlock>> {
@@ -39,8 +39,8 @@ impl TaskManager {
         let tcb = a.clone().unwrap();
         let pid = tcb.pid.0;
         let mut inner = tcb.inner_exclusive_access();
-        info!("fetch pid: {:?} and pass is {:?}", pid, inner.pass);
-        inner.pass += BigStride / inner.prio;
+        //info!("fetch pid: {:?} and pass is {:?}", pid, inner.pass);
+        inner.pass += BIG_STRIDE / inner.prio;
         a
     }
 }
