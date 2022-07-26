@@ -57,6 +57,7 @@ pub fn run_tasks() {
             let idle_task_cx_ptr = processor.get_idle_task_cx_ptr();
             // access coming task TCB exclusively
             let mut task_inner = task.inner_exclusive_access();
+            let k = task.clone();
             let next_task_cx_ptr = &task_inner.task_cx as *const TaskContext;
             task_inner.task_status = TaskStatus::Running;
             drop(task_inner);
@@ -64,8 +65,10 @@ pub fn run_tasks() {
             processor.current = Some(task);
             // release processor manually
             drop(processor);
+            //info!("switch to {:?} in run tasks", k.pid.0);
             unsafe {
                 __switch(idle_task_cx_ptr, next_task_cx_ptr);
+                //info!("switch ok....")
             }
         }
     }

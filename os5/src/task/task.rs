@@ -257,11 +257,11 @@ impl TaskControlBlock {
                     parent: Some(Arc::downgrade(self)),
                     children: Vec::new(),
                     exit_code: 0,
-                    first_time: 0, 
-                    dispatched: false,
-                    syscall_times: [0; MAX_SYSCALL_NUM],
-                    pass: 0,
-                    prio: 16
+                    first_time: parent_inner.first_time, 
+                    dispatched: parent_inner.dispatched,
+                    syscall_times: parent_inner.syscall_times.clone(),
+                    pass: parent_inner.pass,
+                    prio: parent_inner.prio
                 })
             },
         });

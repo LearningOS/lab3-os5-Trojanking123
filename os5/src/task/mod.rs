@@ -40,6 +40,7 @@ use crate::timer::get_time_ms;
 
 /// Make current task suspended and switch to the next task
 pub fn suspend_current_and_run_next() {
+    //info!("start of s c a r n");
     // There must be an application running.
     let task = take_current_task().unwrap();
 
@@ -57,6 +58,7 @@ pub fn suspend_current_and_run_next() {
     // ---- release current PCB
 
     // push back to ready queue.
+    info!("push task: {:?} back to queue", task.pid.0 );
     add_task(task);
     // jump to scheduling cycle
     schedule(task_cx_ptr);
@@ -157,5 +159,5 @@ pub fn set_priority_inner(prio: isize) -> isize {
     info!("set task: {:?} prio from {:?} to {:?}", task.pid.0, inner.prio, prio);
     inner.prio = prio;
 
-    0
+    prio
 }
