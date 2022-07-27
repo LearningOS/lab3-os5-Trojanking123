@@ -25,7 +25,7 @@ static TESTS: &[&str] = &[
     "ch5_setprio\0",
     // "ch5_stride\0",
 ];
-static STEST: &str = "ch5_stride0\0";
+static STEST: &str = "ch5_stride\0";
 
 use user_lib::{spawn, waitpid};
 
